@@ -1,0 +1,44 @@
+--------------------------------
+>>>>For .env file first:
+    1: .env create file 
+    2: MONGO_URI = put the mongoDb connection lin here
+---------------------------------
+>>>>For MongoDb Connection :
+    1-Always copy the user name and passowrd and store it somewhere
+    2-Select the Cloud Enviroment 
+    3-On 0.0.0.0 Ip address in Network Access so that anywhere you can access the mongo db
+
+----------------------------------
+
+>>>>After cloning the project :
+    1-npm install 
+    2-nodemon index.js 
+---------------------------------
+>>>>>Jwt SetUp
+      $ npm install jsonwebtoken
+      const jwt = require('jsonwebtoken')
+>>>>>For creating jwt scraet key :
+      require('crypto').randomBytes(64).toString('hex')
+
+-------------------------------------------
+>>>>>Qureys For Data Retrive
+      const query = { price: { $lt: 500 } };
+      const query ={price :{$gt:500}};
+      const query = { price: { $gte: 500 } };
+      const  query ={price :{$in:[500,650]}};
+      const query = { category: { $in: ["Mocha", "Latte"] } };
+      const query = {category:{$in:["Mocha"]}}
+       const query ={price:{$ne : 500}}
+      const query ={$and :[{category :{$in:["Mocha","Latte"]}},{price:{$gt:250}}]}
+      db.collection.find({name:{'$regex' : '^string$', '$options' : 'i'}})
+      const query = {
+        $and: [
+          { brand: { $eq: "Tim Hortons" } },
+          { category: { $in: ["Mocha", "Latte"] } },
+        ],
+      };
+>>>>>For search query : 
+     db.collection.find({ name: { $regex: "^string$", $options: "i" } });
+      const query = {
+        productName: { $regex: searchValue, $options: "i" },
+      };
