@@ -1,0 +1,277 @@
+//math query
+const pipeline = [
+  {
+    $match: { email: "iammehedi296@gmail.com" },
+  },
+];
+const result = await paymentCollection.aggregate(pipeline).toArray();
+
+// --------------------------------------------------
+
+// $group expression :
+$group : {
+  _id : exprssion ,
+  field : expression,
+  field : expression 
+}
+
+//Goruping by selected field
+const pipeline = [
+  {
+    $group: {
+      _id: "$category",
+    },
+  },
+];
+//in this query i want to show the food according thier category  mane oi category wise ke ke ache oigulo 
+const pipeline = [
+        {
+          $group: {
+            _id: "$category",
+            foodName: { $push: "$name" }, //??the name field uses the $push operator to add the name field form each document in the froup to an array//
+          },
+        },
+      ];
+
+// in this query i push full document according  to their category
+const pipeline = [
+        {
+          $group: {
+            _id: "$category",
+            document: { $push: "$$ROOT" },  // The $$ROOT value is a reference to the current document being processedd in the pipeline which represents the complete document 
+          },
+        },
+      ];
+
+// in this query ekhane oi food ta  onek gulo category ache ami cacchi oi food name match kore tor category group kore dite and also findout the count like drinks ar modde e food koybar available 
+  const pipeline = [
+        {
+          $match: { name: "Escalope de Veau" },
+        },
+        {
+          $group: {
+            _id: "$category",
+            food: { $push: "$$ROOT" },
+            foodCount: { $sum: 1 }, // $sum 1 mean it will increment by one it match same foood
+          },
+        },
+      ];
+
+//Give a count for khane oi food ta  onek gulo category ache ami cacchi oi food name match kore tor categulo group kore dite and also findout the count like drinks ar modde e food koybar available  and according to count i add sorting 
+ const pipeline = [
+        {
+          $match: { name: "Escalope de Veau" },
+        },
+        {
+          $group: {
+            _id: "$category",
+            item: { $push: { name: "$name", price: "$price" } },
+            groupItemCount: { $sum: 1 },
+          },
+        },
+        {
+          $sort :{groupItemCount : -1}
+        }
+         { // etay category group kontay beshi count ache
+          $group: {
+            _id: null, //null it will overall give a group document. mane pura ekta document return korebe,
+            maxNumberInCategoryGroup: { $max: "$groupItemCount" },
+          },
+        },
+      ];
+//--------------
+ const pipeline = [
+        {
+          $group: {
+            _id: "$name",
+            info: {
+              $push: {
+                Email: "$email",
+                Phone: "$phone",
+                Orders: "$orderProducts",
+              },
+            },
+          },
+        },
+      ];
+
+//---------------------
+  const pipeline = [
+        {
+          $unwind: "$orderProducts", // perform the unwind if propery avaible 
+        },
+        {
+          $group: {
+            _id: "$name",
+            info: {
+              $push: {
+                name: "$name",
+                phone: "$phone",
+                orderFoodName: "$orderProducts.productName",
+              },
+            },
+          },
+        },
+      ];
+
+// ekhane cartitmeId ta array chilo pore seta unwind convert kora hole it's group by cartItemId and insert the info who ever order it in the  cart 
+
+ const pipeline = [
+        {
+          $unwind: "$cartItemsId",
+        },
+        {
+           $group :{
+              _id : '$cartItemsId',
+              info:{
+                 //$addToSet push jayga eta boshaile push mot kaj korbe but duplicate gulo remove kore dive 
+                  $push : { name : "$name" ,email : "$email"}
+              }
+           }
+        }
+      ];
+
+//this is total avarage or total process
+ const pipeline = [
+        {
+          $group: {
+            _id: null,
+            totalPrice:  { $sum: { $toInt: "$orderItems.productPrice" } } //$toInt means convert it into integer,
+            avarage: {$avg :"$amount"}
+          },
+        },
+      ];
+
+
+//count the total user using useremail :
+
+const pipline = [
+        {
+          $group: {
+            _id: "$customerEmail",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+          },
+        },
+      ];
+  const result = await orderCollection.aggregate(pipline).toArray();
+      res.send(result);
+
+///count all the cartItemsId
+ const pipeline =[
+         {
+           $unwind : "$cartItemsId"
+         },
+         {
+           $group :{
+              _id : null,
+              count : {$sum : 1}
+           },
+           
+         }
+      ]
+
+      or
+
+      const pipeline = [
+        {
+          $group: {
+            _id: null,
+            count: {
+              $sum: { $size: "$cartItemsId" },
+            },
+          },
+        },
+      ];
+
+      or
+
+         const pipeline = [
+        {
+          $group: {
+            _id: null,
+            count: {
+              $sum: { $size: { $ifNull: ["$cartItemsId",[]] } },
+            },
+          },
+        },
+      ];
+
+/// using unwind spepare cartItemId then put every cartitmeId in one array
+ const pipeline = [
+        {
+          $unwind: "$cartItemsId",
+        },
+        {
+          $group: {
+            _id: null,
+            cartId: { $push: "$cartItemsId" },
+          },
+        },
+      ];
+//Lookup operator 
+ const pipeline = [
+        {
+          $unwind: "$orderProducts",
+        },
+        {
+          $addFields: {
+            productIdObj: { $toObjectId: "$orderProducts.productId" },
+          },
+        },
+        {
+          $lookup: {
+            from: "menu", // Name of the "menu" collection  //this is which collection i want merge to payment collection//
+            localField: "productIdObj", // this is paymentCollection property that i want to match to menuCollection
+            foreignField: "_id",// this is menuCollection property that i want to match with  paymentCollection
+            as: "menuItems",
+          },
+        },
+        {
+          $unwind: "$menuItems",
+        },
+        {
+          $group: {
+            _id: "$menuItems.category",
+            count: { $sum: 1 },
+            totalPrice: { $sum: "$menuItems.price" },
+           
+          },
+        },
+      ];
+
+      const result = await paymentCollection.aggregate(pipeline).toArray();
+
+    //$project operator
+    You can specify which fields you want to include or exclude in the output documents. To include a field, set its value to 1, and to exclude a field, set its value to 0.
+    {
+  $project: {
+    includedField1: 1,
+    includedField2: 1,
+    _id: 0, // Exclude the _id field
+    excludedField: 0,
+  }
+}
+
+
+ //this multiply prodcut quantity and prodcut price then sum them
+
+  const pipline = [
+        {
+          $unwind: "$orderItems",
+        },
+        {
+          $group: {
+            _id: "$orderItems.productName",
+            count: { $sum: 1 },
+            totalSelledPrice: { $sum: { $multiply: [ { $ifNull: [ { $toInt: "$orderItems.productPrice" }, 0 ] }, { $ifNull: [ "$orderItems.productQuantity", 0 ] } ] } },
+            photoUrl: { $addToSet: "$orderItems.productImg" },
+          },
+        },
+        {
+          $sort: { totalSelledPrice: -1 },
+        },
